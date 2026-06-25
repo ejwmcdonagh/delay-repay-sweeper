@@ -1,0 +1,29 @@
+{
+  "name": "delay-repay-sweeper",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Local-first agent that finds delayed UK rail journeys and helps reclaim Delay Repay compensation.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "tsx lib/daemon/main.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "imapflow": "^1.0.0",
+    "mailparser": "^3.7.0"
+  },
+  "optionalDependencies": {
+    "playwright": "^1.48.0"
+  },
+  "devDependencies": {
+    "@types/mailparser": "^3.4.6",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0",
+    "vitest": "^4.1.9"
+  }
+}

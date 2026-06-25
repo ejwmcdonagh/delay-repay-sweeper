@@ -1,0 +1,13 @@
+{
+  "_comment": "TOC code -> Delay Repay portal URL. The Claim Generation helper loads the URL for the delayed leg's operator. Verify each URL before relying on it; TOC portals move. Fill the remaining operators from the PRD's supported-TOC list as parsers land.",
+  "AW": "https://www.tfwrail.wales/delay-repay",
+  "AV": "https://www.avantiwestcoast.co.uk/help-and-support/delay-repay",
+  "GW": "https://www.gwr.com/help-and-support/refunds-and-compensation/delay-repay",
+  "GR": "https://www.lner.co.uk/help-and-support/delay-repay",
+  "SE": "https://www.southeasternrailway.co.uk/help-and-support/delay-repay",
+  "SW": "https://www.southwesternrailway.com/contact-and-help/delay-repay",
+  "XC": "https://www.crosscountrytrains.co.uk/delays-and-compensation",
+  "TP": "https://www.tpexpress.co.uk/help/delay-repay",
+  "NT": "https://www.northernrailway.co.uk/delays/delay-repay",
+  "SR": "https://www.scotrail.co.uk/delay-repay"
+}

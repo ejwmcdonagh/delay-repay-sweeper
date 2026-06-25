@@ -1,0 +1,7 @@
+{
+  "_comment": "Per-TOC claim portal requirements, grounded in each operator's published 'what you need to claim' guidance. accountRequired = the portal forces a login before claiming (e.g. Avanti) vs an open form (e.g. GWR). Verify per portal before enabling autonomous mode; defaults apply when a TOC is absent.",
+  "default": { "accountRequired": false },
+  "AV": { "accountRequired": true },
+  "GW": { "accountRequired": false },
+  "GR": { "accountRequired": true }
+}

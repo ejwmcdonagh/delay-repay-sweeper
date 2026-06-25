@@ -1,0 +1,13 @@
+{
+  "_comment": "Per-TOC DOM selectors for autonomous form-fill. Values are illustrative placeholders — selectors MUST be verified against each live portal before enabling autonomous mode. captchaSitekey is read from the page if absent.",
+  "AV": {
+    "bookingRef": "#booking-reference",
+    "origin": "#origin-station",
+    "destination": "#destination-station",
+    "scheduledArrival": "#scheduled-arrival",
+    "delayMinutes": "#delay-length",
+    "claimantName": "#full-name",
+    "claimantEmail": "#email",
+    "submit": "button[type=submit]"
+  }
+}

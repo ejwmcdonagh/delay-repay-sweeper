@@ -1,0 +1,6 @@
+node_modules/
+.DS_Store
+*.log
+# Secrets/vault never leave the machine, and never the repo.
+.vault/
+*.key

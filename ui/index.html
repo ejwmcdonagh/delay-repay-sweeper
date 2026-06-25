@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Delay Repay Sweeper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+    <script>
+      // Palette + typography straight from the PRD's styling spec.
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "system-ui", "sans-serif"], mono: ["JetBrains Mono", "monospace"] },
+            colors: { accent: "#2563EB", claim: "#059669", warn: "#D97706" },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="bg-slate-50 text-slate-800 font-sans">
+    <div class="max-w-6xl mx-auto p-6">
+      <header class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-semibold">Delay Repay Sweeper</h1>
+          <p id="mode" class="text-sm text-slate-500"></p>
+        </div>
+        <div id="dash-actions" class="flex gap-2">
+          <button id="scan" class="bg-accent text-white px-4 py-2 rounded-md text-sm font-medium">Scan email</button>
+          <button id="toggle-settings" class="border border-slate-300 px-4 py-2 rounded-md text-sm font-medium">Settings</button>
+        </div>
+      </header>
+
+      <!-- First-run setup wizard. Shown until an RTT token + at least one route exist (or demo is on). -->
+      <section id="wizard" class="hidden bg-white rounded-lg border border-slate-200 p-6 mb-6 max-w-2xl mx-auto"></section>
+
+      <div id="dashboard">
+        <section id="metrics" class="grid grid-cols-3 gap-4 mb-6"></section>
+
+        <section id="settings" class="hidden bg-white rounded-lg border border-slate-200 p-4 mb-6"></section>
+
+        <section class="bg-white rounded-lg border border-slate-200 overflow-hidden">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-left">
+              <tr>
+                <th class="px-4 py-2 font-medium">Date</th>
+                <th class="px-4 py-2 font-medium">Route</th>
+                <th class="px-4 py-2 font-medium">Operator</th>
+                <th class="px-4 py-2 font-medium">Sched. Arr.</th>
+                <th class="px-4 py-2 font-medium">Actual</th>
+                <th class="px-4 py-2 font-medium">Delay</th>
+                <th class="px-4 py-2 font-medium">Refund</th>
+                <th class="px-4 py-2 font-medium">Status</th>
+                <th class="px-4 py-2"></th>
+              </tr>
+            </thead>
+            <tbody id="tickets"></tbody>
+          </table>
+        </section>
+      </div>
+    </div>
+
+    <!-- Shared station suggestions; populated once from /api/stations. All station inputs link via list=. -->
+    <datalist id="stations"></datalist>
+
+    <div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center p-4"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
