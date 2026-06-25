@@ -14,6 +14,8 @@ to the claim page (and, if you want, it fills most of the form in for you).
 > **In one sentence:** it's a robot that watches your trains and tells you when the railway owes
 > you a refund.
 
+<img width="1438" height="719" alt="image" src="https://github.com/user-attachments/assets/d88fd46b-62c5-4c1e-ac92-f5f3975d2999" />
+
 ---
 
 ## Table of contents
