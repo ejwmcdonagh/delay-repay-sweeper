@@ -8,6 +8,11 @@ export interface RouteService {
   actualArrival: Date | null;
   /** Operating TOC code, when the data source provides it (lets route claims pick the right portal). */
   toc?: string;
+  /** Originating station CRS, when known — lets a watched route drop arrivals from other origins. */
+  originCrs?: string;
+  /** This scheduled service was cancelled — no actualArrival, but the gap still causes a delay if a
+   * later service is taken instead. */
+  cancelled?: boolean;
 }
 
 export interface ArrivalProvider {

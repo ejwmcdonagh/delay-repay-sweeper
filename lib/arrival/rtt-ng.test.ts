@@ -32,4 +32,8 @@ describe("parseNgServices", () => {
   it("treats a cancelled train as not arrived", () => {
     expect(parseNgServices(response)[1].actualArrival).toBeNull();
   });
+
+  it("flags a cancelled train as cancelled", () => {
+    expect(parseNgServices(response)[1].cancelled).toBe(true);
+  });
 });

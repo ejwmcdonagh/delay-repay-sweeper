@@ -6,7 +6,6 @@ import { RttArrivalProvider } from "../arrival/rtt.js";
 import { RttNgArrivalProvider } from "../arrival/rtt-ng.js";
 import { HspBackfiller, msUntilNextRun } from "../arrival/hsp.js";
 import { ManualHelperExecutor } from "../claim/executor.js";
-import { PlaywrightExecutor } from "../claim/playwright.js";
 import { registerStations } from "../stations.js";
 import { getPassphrase } from "../keychain.js";
 import { demoProvider, demoRoute } from "../demo.js";
@@ -44,13 +43,9 @@ const buildProvider = (config: typeof state.config) =>
 const demo = !!state.config.demo;
 const provider = buildProvider(state.config);
 
-// Manual helper is always available; the headless filer is built only when a CAPTCHA key exists.
-// claim() selects between them per-call based on the live mode.
-const autoExecutor = state.config.captcha ? new PlaywrightExecutor(state.config.captcha.apiKey) : undefined;
-
 const ctx: Ctx = {
   statePath: STATE_PATH, passphrase: PASSPHRASE, state, provider,
-  executor: new ManualHelperExecutor(), autoExecutor, demo, buildProvider,
+  executor: new ManualHelperExecutor(), demo, buildProvider,
 };
 
 // Live sweep every 5 minutes: poll due arrivals, fire notifications and deadline alerts.
@@ -67,5 +62,5 @@ if (state.config.hsp) {
 }
 
 createServer(ctx).listen(PORT, "127.0.0.1", () => {
-  console.log(`Delay Repay Sweeper — dashboard at http://127.0.0.1:${PORT}  (mode: ${state.config.mode}${demo ? ", demo" : ""})`);
+  console.log(`Delay Repay Sweeper — dashboard at http://127.0.0.1:${PORT}${demo ? "  (demo)" : ""}`);
 });

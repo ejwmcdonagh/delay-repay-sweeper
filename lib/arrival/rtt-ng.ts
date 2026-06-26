@@ -15,6 +15,9 @@ interface NgArrival {
 interface NgService {
   temporalData?: { arrival?: NgArrival };
   scheduleMetadata?: { operator?: { code?: string } };
+  // Originating station, so a watched route can drop arrivals from other origins. ponytail: field
+  // name assumed for the NG schema like the rest of this client — verify against live data.
+  locationDetail?: { origin?: { crs?: string }[] };
 }
 export interface NgResponse {
   services?: NgService[] | null;
@@ -43,6 +46,8 @@ export function parseNgServices(json: NgResponse): RouteService[] {
       scheduledArrival: parseNaive(a.scheduleAdvertised),
       actualArrival: a.isCancelled || !a.realtimeForecast ? null : parseNaive(a.realtimeForecast),
       toc: s.scheduleMetadata?.operator?.code,
+      originCrs: s.locationDetail?.origin?.[0]?.crs,
+      cancelled: !!a.isCancelled,
     });
   }
   return out;

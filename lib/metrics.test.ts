@@ -23,8 +23,9 @@ describe("computeMetrics", () => {
     expect(m.pendingEligibleCount).toBe(2);
   });
 
-  it("counts only this month's tickets as scanned this month", () => {
-    const m = computeMetrics([ticket("eligible", 1000, "2026-06-10T08:00:00.000Z"), ticket("eligible", 1000, "2026-04-10T08:00:00.000Z")], now);
-    expect(m.scannedThisMonth).toBe(1);
+  it("counts only this month's submitted claims as refunds requested", () => {
+    const thisMonth = { ...ticket("claimed", 1500), claimedAt: "2026-06-20T10:00:00.000Z" };
+    const lastMonth = { ...ticket("claimed", 2000), claimedAt: "2026-05-20T10:00:00.000Z" };
+    expect(computeMetrics([thisMonth, lastMonth], now).refundsRequested).toBe(1);
   });
 });

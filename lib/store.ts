@@ -3,38 +3,22 @@ import { dirname } from "node:path";
 import { seal, open, type SealedBlob } from "./vault.js";
 import type { Ticket } from "./types.js";
 
-import type { OAuthProvider } from "./ingest/oauth.js";
 import type { Route } from "./routes.js";
 
-export interface EmailConfig {
-  user: string;
-  host: string;
-  port: number;
-  /** Password auth (IMAP app password) or OAuth2 (managed Gmail / M365). */
-  password?: string;
-  oauth?: { provider: OAuthProvider; clientId: string; refreshToken: string; accessToken?: string; expiry?: string };
-}
-
-// notify  = alert only; user claims manually via the portal link.
-// manual  = alert + side-by-side copy helper (default).
-// auto    = alert + autonomous headless filing (advanced, opt-in).
-export type Mode = "notify" | "manual" | "auto";
-
 export interface Config {
-  email?: EmailConfig;
   // Next Gen RTT: just `token` (long-life token from api-portal.rtt.io). Old api.rtt.io basic auth
   // (deprecated, retires 30 Sep 2026) also supplies `user`.
   rtt?: { token: string; user?: string; baseUrl?: string };
   hsp?: { user: string; password: string };
   // Identity is injected into TOC claim forms. Lives in the encrypted state only.
   identity?: { name: string; email: string; address: string; phone?: string; sortCode?: string; accountNumber?: string };
-  captcha?: { provider: "2captcha"; apiKey: string };
-  /** Watched journeys (season-ticket / no-email monitoring). */
+  /** Watched journeys — the only ticket source. */
   routes?: Route[];
-  /** Opt-in sample data (scripted arrivals + sample inbox) for trying the app with no credentials. */
+  /** Opt-in sample data (scripted arrivals + a demo route) for trying the app with no credentials. */
   demo?: boolean;
+  /** Ticket type new route-monitored tickets inherit (the dashboard's top toggle). Per-ticket overridable. */
+  defaultTicketType?: import("./eligibility.js").TicketType;
   scanDays: number;
-  mode: Mode;
 }
 
 export interface AppState {
@@ -42,9 +26,9 @@ export interface AppState {
   tickets: Ticket[];
 }
 
-// Default to the easy path: notify-only, watched routes, no email/automation to set up.
+// Default to the easy path: watched routes, no automation to set up.
 export const defaultState = (): AppState => ({
-  config: { scanDays: 28, mode: "notify" },
+  config: { scanDays: 28 },
   tickets: [],
 });
 

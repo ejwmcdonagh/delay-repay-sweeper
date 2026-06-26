@@ -57,7 +57,7 @@ In plain terms: it behaves like a private notebook on your desk, not like a webs
 - About **15 minutes** for first-time setup.
 - A **free account** with "Realtime Trains" (we'll walk you through getting it — it takes 2
   minutes and costs nothing).
-- That's it. You do **not** need to connect your email, and you do **not** need to be technical.
+- That's it. You do **not** need to be technical.
 
 > 💡 **Just want to look first?** You can run the app in **Demo Mode** with made-up sample journeys
 > and skip everything below about accounts. See [Demo Mode](#demo-mode-try-before-you-set-anything-up).
@@ -254,13 +254,6 @@ the real thing.)
 How far back to look for delays (7–28 days). 28 is the default and usually the maximum the train
 companies allow.
 
-### Connecting your email inbox *(optional, advanced)*
-
-**Most people should skip this and use Watched Routes instead** — it's simpler and needs no email
-access. But if you'd like the app to read confirmation emails and pick up *one-off* trips
-automatically, it can connect to Gmail or Microsoft 365. This is more fiddly to set up and is
-explained inside Settings.
-
 ---
 
 ## 🔁 Stopping, starting, and updating
@@ -328,17 +321,16 @@ data and settings are all still there.
 No. The app is free and open-source, and the Realtime Trains data account is free too.
 
 **Will it claim money automatically and put it in my account?**
-By default, **no** — it tells you when you're owed and helps you claim, but *you* press the buttons
-on the train company's site. There's an optional "Auto" mode that attempts the form for you, but
-it's experimental (see disclaimers).
+No — no train company exposes a public claim API, so the app can't file on your behalf. It tells you
+when you're owed, opens the right Delay Repay portal, and hands you the exact field values to paste.
+*You* press the buttons on the train company's site, then mark the claim as filed.
 
 **Do I have to give it my bank details?**
 Only if and when you make a claim that needs them (the refund has to go somewhere). They're stored
 encrypted on your own computer and only used to fill the train company's claim form.
 
 **Does it read my emails?**
-Not unless you specifically set that up (it's optional and off by default). The normal way to use
-the app — "watched routes" — needs no email access at all.
+No. It never touches your email. It watches the train routes you define and checks live arrival data.
 
 **Which train companies does it work with?**
 Delay detection works for any National Rail journey. The claim step links you to the correct train
@@ -376,10 +368,9 @@ in `lib/` (pure logic, fully tested), `ui/` (the dashboard), and `lib/daemon/` (
   to any train company, National Rail, or Realtime Trains.
 - **You are responsible for the claims you submit.** Only claim for journeys you actually made.
   Submitting false claims is fraud.
-- The optional **"Auto" mode** that fills and submits claim forms for you is **experimental and
-  unverified against live train-company websites**. It may stop working if a site changes, and
-  automated submission may be against some train companies' terms of use. The safe, recommended
-  default is "Notify" or "Manual helper", where you stay in control.
+- The app **never submits claims for you** — no train company offers a claim API, so you always
+  file on the operator's own portal and stay in control. "Manual helper" copies the field values for
+  you; "Notify" just alerts you. Either way you press the buttons.
 - Always double-check the details before submitting any claim.
 
 ---

@@ -1,4 +1,5 @@
 import { assessDelay } from "./eligibility.js";
+import { schemeForToc } from "./toc/schemes.js";
 import type { ArrivalProvider } from "./arrival/provider.js";
 import type { Ticket } from "./types.js";
 
@@ -29,6 +30,7 @@ export async function validateTicket(
     actualArrival: actual,
     pricePence: ticket.journey.pricePence,
     ticketType: ticket.journey.ticketType,
+    scheme: schemeForToc(ticket.toc),
   });
 
   return {

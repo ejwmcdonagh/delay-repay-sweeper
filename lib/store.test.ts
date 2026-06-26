@@ -6,7 +6,7 @@ import { load, save, upsertTicket, defaultState } from "./store.js";
 import type { Ticket } from "./types.js";
 
 const ticket = (id: string): Ticket =>
-  ({ id, journey: {} as any, destinationCrs: "MAN", toc: "AV", status: "scanned", pollAttempts: 0 });
+  ({ id, journey: {} as any, destinationCrs: "MAN", toc: "AV", status: "awaiting-arrival", pollAttempts: 0 });
 
 describe("store", () => {
   it("returns default state when the file does not exist", () => {

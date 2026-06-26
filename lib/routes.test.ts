@@ -37,4 +37,9 @@ describe("routeTicket", () => {
     expect(t.destinationCrs).toBe("BTN");
     expect(t.journey.pricePence).toBe(0);
   });
+
+  it("inherits the route's fare for the ticket type so refunds can be costed", () => {
+    const t = routeTicket({ ...route, fares: { single: 1240 } }, new Date("2026-06-25T08:30:00Z"), "single");
+    expect(t.journey.pricePence).toBe(1240);
+  });
 });

@@ -1,13 +1,14 @@
 {
-  "_comment": "TOC code -> Delay Repay portal URL. The Claim Generation helper loads the URL for the delayed leg's operator. Verify each URL before relying on it; TOC portals move. Fill the remaining operators from the PRD's supported-TOC list as parsers land.",
-  "AW": "https://www.tfwrail.wales/delay-repay",
+  "_comment": "TOC code -> Delay Repay claim page. Only operators listed here show a 'Claim now' button; an unlisted operator is hidden until its portal is added and checked. All URLs below were verified live on 2026-06-25 (200 OK, or 200 via the operator's own redirect). Re-verify before adding new ones — TOC portals move.",
   "AV": "https://www.avantiwestcoast.co.uk/help-and-support/delay-repay",
   "GW": "https://www.gwr.com/help-and-support/refunds-and-compensation/delay-repay",
-  "GR": "https://www.lner.co.uk/help-and-support/delay-repay",
-  "SE": "https://www.southeasternrailway.co.uk/help-and-support/delay-repay",
+  "GR": "https://www.lner.co.uk/support/delay-repay/",
+  "SE": "https://www.southeasternrailway.co.uk/help/refunds-and-compensation/delay-repay-compensation",
   "SW": "https://www.southwesternrailway.com/contact-and-help/delay-repay",
-  "XC": "https://www.crosscountrytrains.co.uk/delays-and-compensation",
-  "TP": "https://www.tpexpress.co.uk/help/delay-repay",
-  "NT": "https://www.northernrailway.co.uk/delays/delay-repay",
-  "SR": "https://www.scotrail.co.uk/delay-repay"
+  "XC": "https://www.crosscountrytrains.co.uk/help-support/delay-repay",
+  "TP": "https://www.tpexpress.co.uk/help/delay-repay-compensation",
+  "NT": "https://www.northernrailway.co.uk/delay-repay",
+  "SR": "https://www.scotrail.co.uk/plan-your-journey/our-delay-repay-guarantee",
+  "AW": "https://tfw.wales/delay-repay",
+  "XR": "https://tfl.gov.uk/fares/refunds/apply-for-a-service-delay-refund"
 }

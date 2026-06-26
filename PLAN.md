@@ -1,12 +1,15 @@
 # Delay Repay Sweeper — Implementation Plan
 
-Maps the Master PRD onto buildable phases. **All five phases are implemented and the app runs
-end-to-end** (`npm start`). Logic is test-driven — 108 Vitest tests, pure logic in
-`lib/`. The acceptance tests below (TC-xxx) are each pinned to a unit test.
+> **Email ingestion removed (2026-06-26).** The IMAP/OAuth inbox-reading path and the per-TOC
+> email parsers never worked reliably; watched routes are simpler and are now the only ticket
+> source. The checkboxes below that mention email/IMAP/OAuth/parsers describe deleted code
+> (`lib/ingest/`, `lib/parsers/`) and are kept only as historical record.
 
-Remaining work is hardening, not net-new architecture: real email-format fixtures per TOC and
-verified Playwright selectors per portal. Each is marked with a `ponytail:` comment at its upgrade
-point in the code.
+Maps the Master PRD onto buildable phases. **The app runs end-to-end** (`npm start`). Logic is
+test-driven — pure logic in `lib/`. The acceptance tests below (TC-xxx) are each pinned to a unit test.
+
+Remaining work is hardening, not net-new architecture: verified Playwright selectors per portal,
+marked with a `ponytail:` comment at its upgrade point in the code.
 
 ## Decisions (from kickoff)
 

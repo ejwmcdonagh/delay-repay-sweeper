@@ -1,12 +1,4 @@
 import type { ClaimPayload } from "./claim/executor.js";
-import type { RawEmail } from "./parsers/types.js";
-
-// TOCs phrase rejections inconsistently; match the common outcomes rather than one exact string.
-const REJECTION = /(claim|delay repay)[\s\S]{0,80}?(rejected|unsuccessful|declined|not been approved)/i;
-
-export function detectRejection(email: RawEmail): boolean {
-  return REJECTION.test(`${email.subject}\n${email.body}`);
-}
 
 /**
  * Draft an appeal from the original claim payload plus the historical arrival proof we already

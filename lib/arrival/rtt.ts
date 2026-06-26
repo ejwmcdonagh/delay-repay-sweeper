@@ -18,7 +18,7 @@ export function buildSearchUrl(crs: string, scheduled: Date): string {
 }
 
 interface RttService {
-  locationDetail?: { gbttBookedArrival?: string; realtimeArrival?: string };
+  locationDetail?: { gbttBookedArrival?: string; realtimeArrival?: string; origin?: { crs?: string }[] };
 }
 interface RttResponse {
   services?: RttService[] | null;

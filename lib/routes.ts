@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { Ticket } from "./types.js";
+import type { TicketType } from "./eligibility.js";
 import { toCrs } from "./stations.js";
 
 // A regular journey the user watches without connecting any email. Instead of one train it covers
@@ -25,6 +26,13 @@ export interface Route {
    * default — each delayed service is surfaced on its own.
    */
   confirm?: boolean;
+  /**
+   * Fares for this journey keyed by ticket type, in integer pence (money is never a float on the
+   * payout path). Each is the per-journey amount the refund is banded off: for a return, the whole
+   * ticket (assessDelay halves it per leg); for season/travelcard/multi, your per-journey (daily- or
+   * trip-equivalent) cost. A type that's missing = unknown, so that ticket shows the band with no £.
+   */
+  fares?: Partial<Record<TicketType, number>>;
 }
 
 /** Deterministic per route + day + service time, so re-sweeping never duplicates a service. */
@@ -42,8 +50,9 @@ export function withinWindow(scheduled: Date, fromTime: string, toTime: string):
   return hhmm >= fromTime && hhmm <= toTime;
 }
 
-/** A ticket for one delayed service found on a watched route. No fare — refund is unknown. */
-export function routeTicket(route: Route, scheduled: Date): Ticket {
+/** A ticket for one delayed service found on a watched route. Carries the route's fare (if set) so
+ * the refund can be costed; without one, refund is unknown and only the band is shown. */
+export function routeTicket(route: Route, scheduled: Date, ticketType: TicketType = "single"): Ticket {
   return {
     id: randomUUID(),
     journey: {
@@ -53,8 +62,8 @@ export function routeTicket(route: Route, scheduled: Date): Ticket {
       destination: route.destination,
       scheduledDeparture: scheduled.toISOString(),
       scheduledArrival: scheduled.toISOString(),
-      pricePence: 0,
-      ticketType: "single",
+      pricePence: route.fares?.[ticketType] ?? 0,
+      ticketType,
     },
     destinationCrs: toCrs(route.destination) ?? "",
     toc: "",

@@ -1,10 +1,22 @@
-import type { Journey } from "./parsers/types.js";
-import type { DelayAssessment } from "./eligibility.js";
+import type { DelayAssessment, TicketType } from "./eligibility.js";
 import type { TicketMedium } from "./claim/requirements.js";
 
-export type { Journey };
+// One watched-route journey. Origin/destination are station names; CRS resolution is a separate
+// lookup (see PLAN.md). Synthesised by routeTicket from a Route the user defined — pricePence comes
+// from the route's stored fare table.
+export interface Journey {
+  retailer: string;
+  bookingRef: string;
+  origin: string;
+  destination: string;
+  /** ISO 8601 timestamps. */
+  scheduledDeparture: string;
+  scheduledArrival: string;
+  pricePence: number;
+  ticketType: TicketType;
+}
 
-// Claim data that an email can't supply — declared by the user per ticket.
+// Claim data the route monitor can't supply — declared by the user per ticket.
 export interface TicketExtras {
   ticketMedium?: TicketMedium;
   ticketNumber?: string; // paper tickets
@@ -13,7 +25,6 @@ export interface TicketExtras {
 }
 
 export type TicketStatus =
-  | "scanned" // parsed from email, awaiting its journey
   | "awaiting-arrival" // scheduled, will be polled at arrival+15
   | "on-time" // polled, arrived < 15 min late
   | "eligible" // delay >= 15 min, claim can be filed
@@ -33,10 +44,15 @@ export interface Ticket {
   actualArrival?: string; // ISO, once known
   assessment?: DelayAssessment;
   claimRef?: string;
+  /** When the claim was submitted (ISO). Drives the "refunds requested this month" metric. */
+  claimedAt?: string;
   pollAttempts: number;
   extras?: TicketExtras;
   /** Set once we've alerted the user this delay is claimable, so we notify only once. */
   notified?: boolean;
-  /** Synthesised from a watched Route rather than a parsed email — no fare, manual claim. */
+  /** Synthesised from a watched Route — fare comes from the route's table, claim is manual. */
   fromRoute?: boolean;
+  /** The booked service was cancelled and a later train was taken; the delay is measured from the
+   * cancelled service's scheduled arrival. Surfaced so the user knows why it counts. */
+  cancelledConnection?: boolean;
 }

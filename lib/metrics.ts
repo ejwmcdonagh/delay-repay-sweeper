@@ -4,7 +4,9 @@ export interface Metrics {
   totalReclaimedPence: number;
   pendingEligiblePence: number;
   pendingEligibleCount: number;
-  scannedThisMonth: number;
+  /** Claims submitted to a TOC this month (status "claimed", dated by claimedAt). Replaces the old,
+   * misleading "scanned this month", which counted by journey date and climbed on auto-created tickets. */
+  refundsRequested: number;
 }
 
 const sameMonth = (iso: string, now: Date) => {
@@ -17,16 +19,19 @@ export function computeMetrics(tickets: Ticket[], now: Date = new Date()): Metri
   let totalReclaimedPence = 0;
   let pendingEligiblePence = 0;
   let pendingEligibleCount = 0;
-  let scannedThisMonth = 0;
+  let refundsRequested = 0;
 
   for (const t of tickets) {
-    if (t.status === "claimed") totalReclaimedPence += t.assessment?.refundPence ?? 0;
+    if (t.status === "claimed") {
+      totalReclaimedPence += t.assessment?.refundPence ?? 0;
+      // Count toward "this month" only when we know the claim date and it falls in the current month.
+      if (t.claimedAt && sameMonth(t.claimedAt, now)) refundsRequested++;
+    }
     if (t.status === "eligible") {
       pendingEligiblePence += t.assessment?.refundPence ?? 0;
       pendingEligibleCount++;
     }
-    if (sameMonth(t.journey.scheduledDeparture, now)) scannedThisMonth++;
   }
 
-  return { totalReclaimedPence, pendingEligiblePence, pendingEligibleCount, scannedThisMonth };
+  return { totalReclaimedPence, pendingEligiblePence, pendingEligibleCount, refundsRequested };
 }
