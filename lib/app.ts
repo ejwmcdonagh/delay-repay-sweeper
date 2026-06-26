@@ -241,11 +241,11 @@ export async function claim(ctx: Ctx, id: string): Promise<ClaimResult> {
   if (ticket.status !== "eligible" && ticket.status !== "action-required") throw new Error(`ticket ${id} is not eligible`);
 
   const portalUrl = claimPortal(ticket.toc);
-  const payload = buildClaimPayload(ticket, ctx.state.config.identity);
+  const payload = buildClaimPayload(ticket);
 
-  // Don't attempt submission while required data is missing (e.g. a paper ticket number, or bank
-  // details). Hand the gap back to the UI to collect, then the user re-submits.
-  const { missing, accountRequired } = claimReadiness(ticket, ctx.state.config.identity);
+  // Don't hand off to the portal while required proof is missing (e.g. a paper ticket number).
+  // Hand the gap back to the UI to collect, then the user re-submits.
+  const { missing, accountRequired } = claimReadiness(ticket);
   if (missing.length) return { status: "needs-input", missing, accountRequired, portalUrl, payload };
 
   // No TOC exposes a claim API, so we never submit on the user's behalf — the manual helper just
@@ -388,14 +388,13 @@ export function setExtras(ctx: Ctx, id: string, extras: TicketExtras): void {
 
 /** Read-model for the dashboard: sanitised config (no secrets) + tickets + metrics. */
 export function view(ctx: Ctx) {
-  const { rtt, hsp, identity, ...safe } = ctx.state.config;
+  const { rtt, hsp, ...safe } = ctx.state.config;
   return {
     config: {
       ...safe,
       hasRtt: !!rtt,
       demo: !!ctx.state.config.demo,
       hasHsp: !!hsp,
-      identity,
     },
     // Dedup in the read path too, so duplicates minted before this existed never show, even if no
     // sweep has run since. portalUrl is set only for operators with a verified Delay Repay portal

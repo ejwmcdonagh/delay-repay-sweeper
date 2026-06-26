@@ -10,8 +10,6 @@ export interface Config {
   // (deprecated, retires 30 Sep 2026) also supplies `user`.
   rtt?: { token: string; user?: string; baseUrl?: string };
   hsp?: { user: string; password: string };
-  // Identity is injected into TOC claim forms. Lives in the encrypted state only.
-  identity?: { name: string; email: string; address: string; phone?: string; sortCode?: string; accountNumber?: string };
   /** Watched journeys — the only ticket source. */
   routes?: Route[];
   /** Opt-in sample data (scripted arrivals + a demo route) for trying the app with no credentials. */

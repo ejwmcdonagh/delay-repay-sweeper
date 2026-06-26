@@ -15,7 +15,7 @@ export function generateAppeal(payload: ClaimPayload, proof: string): string {
     `Independent arrival evidence: ${proof}`,
     "",
     `I therefore request the compensation due of £${(payload.refundPence / 100).toFixed(2)}.`,
+    // The user adds their own sign-off — the app no longer holds their name.
     `Regards,`,
-    payload.claimantName,
   ].join("\n");
 }

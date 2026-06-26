@@ -43,9 +43,9 @@ Yes — privacy is the whole point.
   sign up for with us, and no company (including us) that can see your data.
 - The only places it ever connects to are: the **railway data service** (to check if trains were
   late) and, when *you* click to claim, the **train company's own website**.
-- Your personal details (name, address, bank details for refunds) are saved in an **encrypted
-  file** on your machine, locked with a key kept in your computer's own secure store (the Mac
-  Keychain, Windows Credential Manager, or the Linux secret service).
+- **It never asks for your name, address, or bank details.** When a train was late, it opens the
+  operator's own claim form and you fill those in there, just as you would by hand — the app only
+  hands you the journey facts (date, route, how late it was) to save you typing.
 
 In plain terms: it behaves like a private notebook on your desk, not like a website.
 
@@ -215,8 +215,8 @@ When a journey is **Eligible**, click **Claim now**. A window opens with:
 - A button that opens the **correct train company's official claim page**.
 - Depending on your chosen mode (below), either a **"copy" helper** that hands you each piece of
   information to paste into their form, or just the link for you to do it yourself.
-- If anything is missing that their form needs (for example, a paper ticket's number, or your bank
-  details for the refund), it asks you for it once and remembers it.
+- If their form needs proof you have to supply by hand (for example, a paper ticket's number), it
+  asks you for that once.
 
 You always submit on the train company's own website — the app helps you get there with everything
 ready.
@@ -326,8 +326,8 @@ when you're owed, opens the right Delay Repay portal, and hands you the exact fi
 *You* press the buttons on the train company's site, then mark the claim as filed.
 
 **Do I have to give it my bank details?**
-Only if and when you make a claim that needs them (the refund has to go somewhere). They're stored
-encrypted on your own computer and only used to fill the train company's claim form.
+No. The app never asks for them. You enter your bank details directly on the train company's own
+claim form when you file, exactly as you would without the app.
 
 **Does it read my emails?**
 No. It never touches your email. It watches the train routes you define and checks live arrival data.

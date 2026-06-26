@@ -5,8 +5,7 @@ import type { ClaimPayload } from "./claim/executor.js";
 const payload: ClaimPayload = {
   bookingRef: "AB12CD", origin: "London Euston", destination: "Manchester Piccadilly",
   scheduledArrival: "2026-06-24T16:38:00.000Z", actualArrival: "2026-06-24T17:00:00.000Z",
-  delayMinutes: 22, pricePence: 4000, refundPence: 1000, claimantName: "A Commuter", claimantEmail: "a@b.com",
-  claimantAddress: "1 St", claimantPhone: "07000 000000", bankSortCode: "00-00-00", bankAccountNumber: "12345678",
+  delayMinutes: 22, pricePence: 4000, refundPence: 1000,
 };
 
 describe("generateAppeal", () => {

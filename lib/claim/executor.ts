@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Ticket } from "../types.js";
-import type { Config } from "../store.js";
 
 const portals: Record<string, string> = JSON.parse(
   readFileSync(fileURLToPath(new URL("../toc/portals.json", import.meta.url)), "utf8"),
@@ -9,7 +8,8 @@ const portals: Record<string, string> = JSON.parse(
 
 import type { FieldSpec } from "./requirements.js";
 
-/** The exact data a Delay Repay form needs, reused for both copy-buttons and DOM auto-fill. */
+// The journey facts we hand the user to paste into the portal. Personal/bank details aren't here —
+// the user enters those on the TOC's own form, so the app never stores them.
 export interface ClaimPayload {
   bookingRef: string;
   ticketNumber?: string; // paper tickets — not present in any email
@@ -20,16 +20,10 @@ export interface ClaimPayload {
   delayMinutes: number;
   pricePence: number;
   refundPence: number;
-  claimantName: string;
-  claimantEmail: string;
-  claimantAddress: string;
-  claimantPhone: string;
-  bankSortCode: string;
-  bankAccountNumber: string;
 }
 
 export interface ClaimResult {
-  // needs-input = required fields are missing (e.g. a paper ticket number or bank details).
+  // needs-input = required proof is missing (e.g. a paper ticket number).
   status: "submitted" | "manual" | "failed" | "needs-input";
   portalUrl?: string;
   payload?: ClaimPayload;
@@ -55,7 +49,7 @@ export function claimPortal(toc: string): string {
   return portals[toc] ?? NATIONAL_RAIL;
 }
 
-export function buildClaimPayload(ticket: Ticket, identity: Config["identity"]): ClaimPayload {
+export function buildClaimPayload(ticket: Ticket): ClaimPayload {
   if (!ticket.assessment || !ticket.actualArrival) throw new Error("ticket has no validated delay");
   return {
     bookingRef: ticket.journey.bookingRef,
@@ -67,12 +61,6 @@ export function buildClaimPayload(ticket: Ticket, identity: Config["identity"]):
     pricePence: ticket.journey.pricePence,
     refundPence: ticket.assessment.refundPence,
     ticketNumber: ticket.extras?.ticketNumber,
-    claimantName: identity?.name ?? "",
-    claimantEmail: identity?.email ?? "",
-    claimantAddress: identity?.address ?? "",
-    claimantPhone: identity?.phone ?? "",
-    bankSortCode: identity?.sortCode ?? "",
-    bankAccountNumber: identity?.accountNumber ?? "",
   };
 }
 

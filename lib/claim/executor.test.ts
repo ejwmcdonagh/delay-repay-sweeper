@@ -23,19 +23,19 @@ describe("portalFor", () => {
 
 describe("buildClaimPayload", () => {
   it("carries the delay and refund from the validated assessment", () => {
-    const p = buildClaimPayload(ticket, { name: "A Commuter", email: "a@b.com", address: "1 St" });
+    const p = buildClaimPayload(ticket);
     expect(p.delayMinutes).toBe(22);
     expect(p.refundPence).toBe(1000);
   });
 
   it("throws when the ticket has not been validated", () => {
-    expect(() => buildClaimPayload({ ...ticket, assessment: undefined }, undefined)).toThrow();
+    expect(() => buildClaimPayload({ ...ticket, assessment: undefined })).toThrow();
   });
 });
 
 describe("ManualHelperExecutor", () => {
   it("returns a manual result without auto-submitting", async () => {
-    const payload = buildClaimPayload(ticket, undefined);
+    const payload = buildClaimPayload(ticket);
     const result = await new ManualHelperExecutor().submit(ticket, payload, "https://portal");
     expect(result.status).toBe("manual");
   });

@@ -222,7 +222,6 @@ function routeList(routes) {
 }
 
 function settingsForm(c) {
-  const id = c.identity ?? {};
   return `<form id="config-form" class="grid grid-cols-2 gap-3 text-sm">
     <label class="col-span-2 flex items-center gap-2 text-sm"><input name="demoMode" type="checkbox" ${c.demo ? "checked" : ""} /> Demo mode — show sample data instead of tracking real journeys</label>
 
@@ -244,13 +243,6 @@ function settingsForm(c) {
     <div class="col-span-2 text-sm font-medium ${c.hasRtt ? "text-claim" : "text-slate-400"}">${c.hasRtt ? "✓ RTT token saved" : "○ No RTT token yet"}</div>
     <label class="flex flex-col col-span-2">RTT token (Next Gen)<input name="rttToken" type="password" class="border rounded px-2 py-1" placeholder="${c.hasRtt ? "•••••• saved (paste again to replace)" : "paste token here"}" /></label>
     <label class="flex flex-col col-span-2 text-xs text-slate-400">Legacy api.rtt.io username (only if using the old API — leave blank)<input name="rttUser" class="border rounded px-2 py-1" /></label>
-
-    <div class="col-span-2 border-t pt-2 mt-1 text-slate-500 text-xs uppercase tracking-wide">Claim profile (used to fill forms)</div>
-    <label class="flex flex-col">Full name<input name="idName" class="border rounded px-2 py-1" value="${id.name ?? ""}" /></label>
-    <label class="flex flex-col">Email<input name="idEmail" class="border rounded px-2 py-1" value="${id.email ?? ""}" /></label>
-    <label class="flex flex-col col-span-2">Postal address<input name="idAddress" class="border rounded px-2 py-1" value="${id.address ?? ""}" /></label>
-    <label class="flex flex-col">Bank sort code<input name="idSort" class="border rounded px-2 py-1 font-mono" value="${id.sortCode ?? ""}" /></label>
-    <label class="flex flex-col">Bank account number<input name="idAcct" class="border rounded px-2 py-1 font-mono" value="${id.accountNumber ?? ""}" /></label>
 
     <label class="flex flex-col col-span-2">Backfill past days (7–28)<input name="scanDays" type="number" min="7" max="28" value="${c.scanDays}" class="border rounded px-2 py-1 w-32" /></label>
     <button class="col-span-2 bg-accent text-white px-4 py-2 rounded-md w-fit">Save settings</button>
@@ -432,7 +424,6 @@ document.addEventListener("submit", async (e) => {
   const f = new FormData(e.target);
   const cfg = { scanDays: Number(f.get("scanDays")), demo: !!f.get("demoMode") };
   if (f.get("rttToken")) cfg.rtt = { token: f.get("rttToken"), ...(f.get("rttUser") ? { user: f.get("rttUser") } : {}) };
-  cfg.identity = { name: f.get("idName"), email: f.get("idEmail"), address: f.get("idAddress"), sortCode: f.get("idSort"), accountNumber: f.get("idAcct") };
   render(await api("/api/config", cfg));
 });
 

@@ -1,7 +1,6 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Ticket } from "../types.js";
-import type { Config } from "../store.js";
 
 const toc: Record<string, { accountRequired: boolean }> = JSON.parse(
   readFileSync(fileURLToPath(new URL("./requirements.json", import.meta.url)), "utf8"),
@@ -15,19 +14,13 @@ export type TicketMedium = "eticket" | "paper" | "smartcard" | "oyster" | "conta
 export interface FieldSpec {
   key: string;
   label: string;
-  /** identity = from the saved profile; user = must be entered per-ticket; email = already parsed. */
-  source: "identity" | "user" | "email";
+  /** user = must be entered per-ticket; email = already parsed from the booking email. */
+  source: "user" | "email";
 }
 
-// Every claim needs the claimant's contact + payout details; proof depends on the medium.
-const BASE: FieldSpec[] = [
-  { key: "claimantName", label: "Full name", source: "identity" },
-  { key: "claimantEmail", label: "Email", source: "identity" },
-  { key: "claimantAddress", label: "Postal address", source: "identity" },
-  { key: "bankSortCode", label: "Bank sort code", source: "identity" },
-  { key: "bankAccountNumber", label: "Bank account number", source: "identity" },
-];
-
+// We no longer collect the claimant's identity or bank details — the user fills those in on the
+// TOC's own portal. So the only thing that can still block a claim is proof of travel, which
+// depends on how the ticket was held.
 const PROOF: Record<TicketMedium, FieldSpec[]> = {
   eticket: [{ key: "bookingRef", label: "Booking reference", source: "email" }],
   paper: [{ key: "ticketNumber", label: "Ticket number (long number on the ticket)", source: "user" }],
@@ -42,16 +35,11 @@ export function accountRequired(tocCode: string): boolean {
 }
 
 export function requiredFields(medium: TicketMedium): FieldSpec[] {
-  return [...BASE, ...PROOF[medium]];
+  return PROOF[medium];
 }
 
-function valueFor(key: string, ticket: Ticket, identity: Config["identity"]): unknown {
+function valueFor(key: string, ticket: Ticket): unknown {
   switch (key) {
-    case "claimantName": return identity?.name;
-    case "claimantEmail": return identity?.email;
-    case "claimantAddress": return identity?.address;
-    case "bankSortCode": return identity?.sortCode;
-    case "bankAccountNumber": return identity?.accountNumber;
     case "bookingRef": return ticket.journey.bookingRef;
     case "ticketNumber": return ticket.extras?.ticketNumber;
     case "smartcardRef": return ticket.extras?.smartcardRef;
@@ -61,17 +49,17 @@ function valueFor(key: string, ticket: Ticket, identity: Config["identity"]): un
 }
 
 /**
- * What still blocks this claim: the fields the user must supply (not already in the email or
- * profile) plus whether the TOC portal needs an account login. The claim flow surfaces these
- * before attempting submission, so e.g. a paper ticket prompts for its ticket number.
+ * What still blocks this claim: the proof fields the user must supply (not already in the booking
+ * email) plus whether the TOC portal needs an account login. The claim flow surfaces these before
+ * handing the user to the portal, so e.g. a paper ticket prompts for its ticket number.
  */
-export function claimReadiness(ticket: Ticket, identity: Config["identity"]): {
+export function claimReadiness(ticket: Ticket): {
   missing: FieldSpec[];
   accountRequired: boolean;
 } {
   const medium = ticket.extras?.ticketMedium ?? "eticket";
   const missing = requiredFields(medium)
     .filter((f) => f.source !== "email")
-    .filter((f) => !valueFor(f.key, ticket, identity));
+    .filter((f) => !valueFor(f.key, ticket));
   return { missing, accountRequired: accountRequired(ticket.toc) };
 }
