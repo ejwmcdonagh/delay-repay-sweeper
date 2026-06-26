@@ -8,8 +8,11 @@ faff. So most people never bother, and the train companies keep the money.
 
 Delay Repay Sweeper is a small, free program that runs on **your own computer**. You tell it
 which trains you take. It quietly watches those trains, checks how late they actually ran
-against official railway data, and tells you the moment you're owed money — with a link straight
-to the claim page (and, if you want, it fills most of the form in for you).
+against official railway data, and tells you the moment you're owed money — then opens the right
+claim page with your journey details ready to paste in.
+
+It also keeps an eye on the **London Underground and DLR**: tell it which lines you ride and it
+flags when one's delayed enough that TfL may owe you a refund.
 
 > **In one sentence:** it's a robot that watches your trains and tells you when the railway owes
 > you a refund.
@@ -20,34 +23,32 @@ to the claim page (and, if you want, it fills most of the form in for you).
 
 ## Table of contents
 
-1. [Is this safe? (Your privacy)](#-is-this-safe-your-privacy)
+1. [Is this safe?](#-is-this-safe)
 2. [What you'll need before you start](#-what-youll-need-before-you-start)
 3. [Step-by-step setup (the slow, friendly version)](#-step-by-step-setup)
 4. [The first-run setup wizard](#-the-first-run-setup-wizard)
 5. [Using it day to day](#-using-it-day-to-day)
-6. [Settings explained](#️-settings-explained)
-7. [Stopping, starting, and updating](#-stopping-starting-and-updating)
-8. [Troubleshooting](#-troubleshooting-common-problems)
-9. [Frequently asked questions](#-frequently-asked-questions)
-10. [For the curious: how it works](#-for-the-curious-how-it-works)
-11. [Important disclaimers](#️-important-disclaimers)
-12. [Licence & credits](#-licence--credits)
+6. [London Underground & DLR delays](#-london-underground--dlr-delays)
+7. [Settings explained](#️-settings-explained)
+8. [Stopping, starting, and updating](#-stopping-starting-and-updating)
+9. [Troubleshooting](#-troubleshooting-common-problems)
+10. [Frequently asked questions](#-frequently-asked-questions)
+11. [For the curious: how it works](#-for-the-curious-how-it-works)
+12. [Important disclaimers](#️-important-disclaimers)
+13. [Licence & credits](#-licence--credits)
 
 ---
 
-## 🔒 Is this safe? (Your privacy)
+## 🔒 Is this safe?
 
-Yes — privacy is the whole point.
+Yes. It runs entirely on your own computer — there's no Delay Repay Sweeper "cloud" and no account
+to sign up for with us. The only things it connects to are the **railway data service** (to check
+whether trains ran late), **TfL's public status feed** (for Tube/DLR lines you choose to watch),
+and — only when *you* click to claim — the **train company's own website**.
 
-- **Everything stays on your computer.** There is no Delay Repay Sweeper "cloud", no account to
-  sign up for with us, and no company (including us) that can see your data.
-- The only places it ever connects to are: the **railway data service** (to check if trains were
-  late) and, when *you* click to claim, the **train company's own website**.
-- **It never asks for your name, address, or bank details.** When a train was late, it opens the
-  operator's own claim form and you fill those in there, just as you would by hand — the app only
-  hands you the journey facts (date, route, how late it was) to save you typing.
-
-In plain terms: it behaves like a private notebook on your desk, not like a website.
+It **never asks for your name, address, or bank details.** You enter those directly on the
+operator's claim form when you file, exactly as you would by hand; the app just hands you the
+journey facts (date, route, how late it was) to save you typing.
 
 ---
 
@@ -128,7 +129,7 @@ npm start
 You should see a line like:
 
 ```
-Delay Repay Sweeper — dashboard at http://127.0.0.1:4505  (mode: notify)
+Delay Repay Sweeper — dashboard at http://127.0.0.1:4505
 ```
 
 🎉 It's running! **Leave this terminal window open** — closing it switches the app off.
@@ -148,9 +149,9 @@ The first time you open it, you'll be greeted by the **setup wizard**. On to tha
 
 ## 🧙 The first-run setup wizard
 
-The wizard has **three short steps**. It only appears until you've finished it.
+The wizard has **four short steps** (the last is optional). It only appears until you've finished it.
 
-### Step 1 of 3 — Connect train data
+### Step 1 of 4 — Connect train data
 
 The app needs permission to look up real train times. This comes from a **free** service called
 **Realtime Trains**. Here's how to get your key (called a "token"):
@@ -161,7 +162,7 @@ The app needs permission to look up real train times. This comes from a **free**
 3. Once logged in, create an **app token**.
 4. Copy that token, come back to the wizard, paste it into the box, and click **Save & continue**.
 
-### Step 2 of 3 — Your journey & times
+### Step 2 of 4 — Your journey & times
 
 Tell it the trip you regularly make:
 
@@ -174,12 +175,18 @@ Tell it the trip you regularly make:
 
 Click **Continue**.
 
-### Step 3 of 3 — Which days do you travel?
+### Step 3 of 4 — Which days do you travel?
 
 Tick the days you actually make this journey (Monday–Friday is ticked for you by default). It won't
-bother checking trains on the days you don't travel.
+bother checking trains on the days you don't travel. Click **Continue**.
 
-Click **Finish & start tracking**. The app immediately:
+### Step 4 of 4 — Ticket prices *(optional)*
+
+Enter what you pay for each ticket type you might buy. This lets the app show the actual **£** a
+delay is worth instead of just the band — but it's optional, so click **Skip for now** to add prices
+later from Settings.
+
+Then click **Finish & start tracking**. The app immediately:
 
 - starts watching your trains, **and**
 - **looks back over the last 28 days** to find delays you may have already missed but can still
@@ -223,6 +230,30 @@ ready.
 
 ---
 
+## 🚇 London Underground & DLR delays
+
+Travel by Tube or DLR in London? TfL also refunds you when a journey runs **15 minutes or more**
+late for a reason within its control — the value of a single pay-as-you-go fare, claimed within
+**28 days**.
+
+The Tube works differently from National Rail: there's no per-train timetable, so the app **can't
+measure your exact journey delay** the way it does for trains, and TfL calculates your refund from
+your own Oyster/contactless taps. So for the Tube the app is a **prompt, not an auto-checker**:
+
+- In **Settings**, tick the Tube/DLR lines you use.
+- The dashboard shows each line's **live status** and keeps a **history** of the disruptions it has
+  seen. (TfL doesn't publish past status, so this builds up from the moment you add the lines.)
+- When a line you watch is badly delayed for a refundable reason, it **nudges you to check your TfL
+  account** and links you to TfL's
+  [service delay refund form](https://tfl.gov.uk/fares/refunds/apply-for-a-service-delay-refund).
+  You request the refund there — TfL already has your tap-in/tap-out data, so there's nothing to
+  fill in.
+
+> **Elizabeth line and London Overground** are National Rail services, so they're tracked
+> automatically by the normal train monitoring above — you don't need to add them as Tube lines.
+
+---
+
 ## ⚙️ Settings explained
 
 Click **Settings** (top right) to change any of these at any time.
@@ -230,17 +261,26 @@ Click **Settings** (top right) to change any of these at any time.
 ### Operating modes — how much help do you want?
 
 - **Notify only** — it just tells you you're owed money and links to the claim page. You do the
-  rest. *(Simplest and safest.)*
-- **Manual helper** — same, plus a handy panel that lets you copy each form field with one click.
-- **Auto** — *(advanced, optional)* it tries to fill in and submit the claim for you automatically.
-  See the [disclaimer](#️-important-disclaimers) before using this — it's experimental.
+  rest. *(Simplest.)*
+- **Manual helper** — same, plus a panel that lets you copy each form field with one click, so you
+  can paste it straight into the operator's form.
+
+Either way, **you** review and submit the claim on the train company's own website — the app never
+files it for you (no operator offers a way for it to).
 
 ### Watched routes
 
 This is where your journeys live. You can add more journeys (for example, a different commute or an
 occasional trip) or remove old ones. Each is a station-to-station trip with a time window. There's
 also a **"ask me which train I took"** option for season-ticket holders, for when several trains in
-your window were delayed.
+your window were delayed. To clear out several at once, tick the rows in the table and use
+**Remove selected**.
+
+### Tube & DLR lines
+
+Tick the London Underground and DLR lines you travel on. The dashboard then shows their live status
+and nudges you to check your TfL account when one is badly delayed. See
+[London Underground & DLR delays](#-london-underground--dlr-delays) for what this can and can't do.
 
 ### Demo Mode (try before you set anything up)
 
@@ -336,6 +376,12 @@ No. It never touches your email. It watches the train routes you define and chec
 Delay detection works for any National Rail journey. The claim step links you to the correct train
 company's official Delay Repay page.
 
+**Does it work for the London Underground?**
+Partly. The Tube has no per-journey timetable to check against, so it can't measure an individual
+Tube delay — but it watches your chosen Tube/DLR lines and nudges you to claim a TfL refund when one
+is badly delayed (15+ minutes, claimed in your TfL account). The Elizabeth line and Overground are
+National Rail services, so they're tracked like any other train.
+
 **Where is my data kept?**
 In a hidden, encrypted file in your home folder (`.delay-repay-sweeper`), *not* inside the app
 folder — which is why updating the app never wipes your history.
@@ -352,11 +398,14 @@ You don't need this section to use the app — it's here if you're interested.
   the delay, and applies the standard **Delay Repay** thresholds to decide what you're owed.
 - It can optionally fall back to **National Rail's historical performance data** overnight to confirm
   delays the live check missed.
+- For the **London Underground & DLR**, it watches TfL's public line-status feed and flags
+  refundable disruptions on the lines you've chosen — the Tube has no per-journey timetable to check
+  against, so this is a prompt rather than an automatic delay measurement.
 - Your settings, journeys, and claim details are saved in a single **AES-256 encrypted** file,
   unlocked by a key held in your operating system's secure store.
 
 **For developers:** it's a Node.js + TypeScript project with a no-build, plain HTML/Tailwind
-dashboard. The logic is test-driven (108 automated tests — run `npm test`). The codebase is laid out
+dashboard. The logic is test-driven (126 automated tests — run `npm test`). The codebase is laid out
 in `lib/` (pure logic, fully tested), `ui/` (the dashboard), and `lib/daemon/` (the runner). See
 [PLAN.md](./PLAN.md) for the design and the acceptance-test map.
 
