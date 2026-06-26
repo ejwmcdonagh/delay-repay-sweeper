@@ -2,8 +2,9 @@ import { createServer as createHttp, type IncomingMessage, type ServerResponse }
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Ctx } from "./app.js";
-import { sweep, claim, markFiled, view, setExtras, setTicketDetails, removeTicket, addRoute, removeRoute, setRouteFares, confirmJourney, applyConfig, backfillRoutes } from "./app.js";
+import { sweep, claim, markFiled, view, setExtras, setTicketDetails, removeTicket, removeTickets, addRoute, removeRoute, setRouteFares, confirmJourney, applyConfig, backfillRoutes } from "./app.js";
 import { stationNames } from "./stations.js";
+import { TflApi, tflLineStatus, readTflLog } from "./tfl/status.js";
 
 const ui = (name: string) => readFileSync(fileURLToPath(new URL(`../ui/${name}`, import.meta.url)));
 
@@ -37,6 +38,14 @@ export function createServer(ctx: Ctx) {
       }
       if (req.method === "GET" && url === "/api/state") return send(res, 200, view(ctx));
       if (req.method === "GET" && url === "/api/stations") return send(res, 200, stationNames());
+      if (req.method === "GET" && url === "/api/tfl") {
+        // Live status of the user's watched Tube/DLR lines + the history we've logged locally
+        // (TfL serves no past status). Live fetch can fail offline — degrade to log-only, never 500.
+        const watched = ctx.state.config.tflLines ?? [];
+        const lines = watched.length ? await tflLineStatus(new TflApi(ctx.state.config.tflAppKey), watched).catch(() => []) : [];
+        const history = ctx.tflLogPath ? readTflLog(ctx.tflLogPath, watched) : [];
+        return send(res, 200, { lines, history });
+      }
       if (req.method === "POST" && url === "/api/refresh") {
         // On-demand sweep: poll due arrivals and surface route delays now, instead of waiting for
         // the daemon's 5-minute timer.
@@ -83,6 +92,10 @@ export function createServer(ctx: Ctx) {
       }
       if (req.method === "POST" && url === "/api/ticket/delete") {
         removeTicket(ctx, (await readJson(req)).id);
+        return send(res, 200, view(ctx));
+      }
+      if (req.method === "POST" && url === "/api/tickets/delete") {
+        removeTickets(ctx, (await readJson(req)).ids ?? []);
         return send(res, 200, view(ctx));
       }
       if (req.method === "POST" && url === "/api/ticket/confirm") {

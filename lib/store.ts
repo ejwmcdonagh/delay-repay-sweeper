@@ -16,12 +16,18 @@ export interface Config {
   demo?: boolean;
   /** Ticket type new route-monitored tickets inherit (the dashboard's top toggle). Per-ticket overridable. */
   defaultTicketType?: import("./eligibility.js").TicketType;
+  /** TfL line ids the user commutes on (e.g. ["central","victoria"]) — watched for delay nudges. */
+  tflLines?: string[];
+  /** Optional free TfL Unified API app key (lifts the keyless rate limit). */
+  tflAppKey?: string;
   scanDays: number;
 }
 
 export interface AppState {
   config: Config;
   tickets: Ticket[];
+  /** Per-line date (YYYY-MM-DD) of the last TfL delay nudge, so a line is nudged once a day. */
+  tflNotified?: Record<string, string>;
 }
 
 // Default to the easy path: watched routes, no automation to set up.

@@ -16,8 +16,13 @@ describe("schemeForToc", () => {
     expect(r.eligible).toBe(true);
   });
 
-  it("refunds the single fare for an Elizabeth line delay of 30 minutes", () => {
-    const r = assessDelay({ scheduledArrival: sched, actualArrival: arr(30), pricePence: 4000, ticketType: "single", scheme: schemeForToc("XR") });
+  it("refunds the single fare for a TfL delay of 15 minutes", () => {
+    const r = assessDelay({ scheduledArrival: sched, actualArrival: arr(15), pricePence: 4000, ticketType: "single", scheme: schemeForToc("TFL") });
     expect(r.refundPence).toBe(4000);
+  });
+
+  it("does not refund a TfL delay under 15 minutes", () => {
+    const r = assessDelay({ scheduledArrival: sched, actualArrival: arr(14), pricePence: 4000, ticketType: "single", scheme: schemeForToc("TFL") });
+    expect(r.eligible).toBe(false);
   });
 });

@@ -43,4 +43,9 @@ describe("parseServices", () => {
     expect(services).toHaveLength(1);
     expect(services[0].actualArrival?.toISOString()).toBe("2026-06-24T08:52:00.000Z");
   });
+
+  it("carries the operating TOC from the service's atocCode", () => {
+    const withToc = { services: [{ atocCode: "GW", locationDetail: { gbttBookedArrival: "0830", realtimeArrival: "0852" } }] };
+    expect(parseServices(withToc, date, "06:30", "10:00")[0].toc).toBe("GW");
+  });
 });

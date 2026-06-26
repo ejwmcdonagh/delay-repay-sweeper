@@ -76,7 +76,11 @@ function refundCell(t) {
 // type is a per-journey override of "your usual ticket"; we only flag it when it actually differs,
 // so an unchanged row stays quiet and the column carries no extra noise.
 function operatorCell(t) {
-  const op = `<span class="font-mono">${t.toc || t.journey.retailer}</span>`;
+  // Show the recognisable operator name (server maps the TOC code via tocName); keep the raw code
+  // on hover for anyone who knows them. A watched-route ticket has no operator until live arrival
+  // data names it — show a dash, not the internal "route" retailer marker.
+  const name = t.operator || (t.fromRoute ? "—" : t.journey.retailer);
+  const op = `<span title="${t.toc || "operator unknown until the train runs"}">${name}</span>`;
   if (!t.fromRoute) return op;
   const usual = STATE.config.defaultTicketType ?? "single";
   const overridden = t.journey.ticketType !== usual;
@@ -100,6 +104,7 @@ function row(t) {
       ? `<button data-confirm="${t.id}" class="text-warn font-medium">I took this train</button>`
       : "";
   return `<tr class="border-t border-slate-100">
+    <td class="px-4 py-2"><input type="checkbox" data-sel="${t.id}" /></td>
     <td class="px-4 py-2 font-mono">${date(t.journey.scheduledDeparture)}</td>
     <td class="px-4 py-2">${t.journey.origin} → ${t.journey.destination}${t.cancelledConnection ? `<div class="text-xs text-warn">⚠ booked service cancelled — counted as a delay</div>` : ""}</td>
     <td class="px-4 py-2">${operatorCell(t)}</td>
@@ -114,9 +119,9 @@ function row(t) {
 
 // Friendly day heading like "Thursday 25 June 2026" (UTC, matching the stored ISO times).
 const dayLabel = (iso) => new Date(iso).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
-const dayHeader = (iso) => `<tr><td colspan="9" class="px-4 pt-5 pb-1 font-semibold text-slate-700 bg-slate-50 border-t-2 border-slate-200">${dayLabel(iso)}</td></tr>`;
+const dayHeader = (iso) => `<tr><td colspan="10" class="px-4 pt-5 pb-1 font-semibold text-slate-700 bg-slate-50 border-t-2 border-slate-200">${dayLabel(iso)}</td></tr>`;
 // Outbound = blue (accent), Return = amber (warn), so direction reads at a glance.
-const dirHeader = (label, t) => `<tr><td colspan="9" class="px-4 py-1 text-xs uppercase tracking-wide text-slate-400"><span class="font-medium ${label === "Return" ? "text-warn" : "text-accent"}">${label}</span> · ${t.journey.origin} → ${t.journey.destination}</td></tr>`;
+const dirHeader = (label, t) => `<tr><td colspan="10" class="px-4 py-1 text-xs uppercase tracking-wide text-slate-400"><span class="font-medium ${label === "Return" ? "text-warn" : "text-accent"}">${label}</span> · ${t.journey.origin} → ${t.journey.destination}</td></tr>`;
 
 // Group rows by day, then within a day by direction, so a round trip reads outbound-then-return and
 // it's obvious which direction on which day. Direction order follows earliest departure (the morning
@@ -131,7 +136,9 @@ function ticketRows(tickets) {
     return m;
   };
   let html = "";
-  for (const dayTickets of byKey(sorted, (t) => date(t.journey.scheduledDeparture)).values()) {
+  // Days newest-first (today at the top, going back); within a day rows stay chronological so the
+  // first direction is still the Outbound.
+  for (const dayTickets of [...byKey(sorted, (t) => date(t.journey.scheduledDeparture)).values()].reverse()) {
     html += dayHeader(dayTickets[0].journey.scheduledDeparture);
     const dirs = byKey(dayTickets, (t) => `${t.journey.origin}→${t.journey.destination}`);
     let i = 0;
@@ -170,8 +177,56 @@ function render(state) {
     metricCard("Pending Eligible Claims", `${m.pendingEligibleCount} · ${gbp(m.pendingEligiblePence)}`) +
     metricCard("Refunds Requested This Month", m.refundsRequested);
   renderEarnCta(c, m);
-  $("tickets").innerHTML = ticketRows(state.tickets) || `<tr><td colspan="9" class="px-4 py-8 text-center text-slate-400">No claims yet — your trains have been suspiciously punctual. Add a watched route in Settings and we'll keep an eye on them.</td></tr>`;
+  $("tickets").innerHTML = ticketRows(state.tickets) || `<tr><td colspan="10" class="px-4 py-8 text-center text-slate-400">No claims yet — your trains have been suspiciously punctual. Add a watched route in Settings and we'll keep an eye on them.</td></tr>`;
   $("settings").innerHTML = settingsForm(c);
+  loadTfl();
+  updateBulk(); // a fresh table has nothing selected — hide the bulk bar
+}
+
+// Selected-row bulk bar: count ticked rows, show the Remove-selected button only when any are
+// ticked, and keep the header "select all" box in sync with the rows.
+function updateBulk() {
+  const boxes = [...document.querySelectorAll("[data-sel]")];
+  const checked = boxes.filter((b) => b.checked);
+  $("bulk-bar").classList.toggle("hidden", checked.length === 0);
+  $("bulk-count").textContent = checked.length;
+  const all = $("sel-all");
+  if (all) all.checked = boxes.length > 0 && checked.length === boxes.length;
+}
+
+// All Tube + DLR line ids the TfL status feed exposes (fixed list). Overground & Elizabeth line are
+// omitted — they're National Rail operators already covered by the journey-based rail tracking.
+const TUBE_LINES = [
+  ["bakerloo", "Bakerloo"], ["central", "Central"], ["circle", "Circle"], ["district", "District"],
+  ["hammersmith-city", "Hammersmith & City"], ["jubilee", "Jubilee"], ["metropolitan", "Metropolitan"],
+  ["northern", "Northern"], ["piccadilly", "Piccadilly"], ["victoria", "Victoria"],
+  ["waterloo-city", "Waterloo & City"], ["dlr", "DLR"],
+];
+
+function tflChip(s) {
+  // Amber = refundable disruption (go check), green = good service, grey = disrupted but not TfL's fault.
+  const cls = s.refundable ? "bg-amber-100 text-amber-800" : s.severity >= 10 ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-500";
+  return `<span class="px-2 py-1 rounded text-xs font-medium ${cls}">${s.description}</span>`;
+}
+
+// Fetch live status + locally-logged history for the watched lines and paint the panel. Hidden when
+// no lines are watched. Best-effort: a failed fetch just leaves the panel as-is rather than breaking render.
+async function loadTfl() {
+  const el = $("tfl");
+  const data = await fetch("/api/tfl").then((r) => r.json()).catch(() => null);
+  if (!data || !data.lines.length) return el.classList.add("hidden");
+  el.classList.remove("hidden");
+  const live = data.lines.map((l) => `<div class="flex items-center justify-between py-1"><span>${l.name}</span>${tflChip(l)}</div>`).join("");
+  const history = (data.history || [])
+    .map((h) => `<li class="flex justify-between ${h.refundable ? "text-amber-700" : "text-slate-400"}"><span>${h.ts.slice(0, 10)} — ${h.line}</span><span>${h.description}${h.refundable ? " · may be owed a refund" : ""}</span></li>`)
+    .join("");
+  el.innerHTML = `
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="font-semibold">Tube &amp; DLR</h2>
+      <span class="text-xs text-slate-400">live status of your lines — refunds are claimed in your TfL account</span>
+    </div>
+    <div class="divide-y divide-slate-100 text-sm">${live}</div>
+    ${history ? `<details class="mt-3"><summary class="text-xs text-slate-500 cursor-pointer">Disruption history (logged since you added these lines — TfL doesn't provide past status)</summary><ul class="mt-2 space-y-1 text-xs">${history}</ul></details>` : ""}`;
 }
 
 // Homepage nudge: when there are claimable delays but no prices on file, the £ estimate is £0 — so
@@ -243,6 +298,12 @@ function settingsForm(c) {
     <div class="col-span-2 text-sm font-medium ${c.hasRtt ? "text-claim" : "text-slate-400"}">${c.hasRtt ? "✓ RTT token saved" : "○ No RTT token yet"}</div>
     <label class="flex flex-col col-span-2">RTT token (Next Gen)<input name="rttToken" type="password" class="border rounded px-2 py-1" placeholder="${c.hasRtt ? "•••••• saved (paste again to replace)" : "paste token here"}" /></label>
     <label class="flex flex-col col-span-2 text-xs text-slate-400">Legacy api.rtt.io username (only if using the old API — leave blank)<input name="rttUser" class="border rounded px-2 py-1" /></label>
+
+    <div class="col-span-2 border-t pt-2 mt-1 text-slate-500 text-xs uppercase tracking-wide">Tube &amp; DLR lines (London)</div>
+    <p class="col-span-2 text-xs text-slate-500">Tick the lines you travel on. We'll show their live status and nudge you to check your TfL account when one's badly delayed (Tube refunds are 15+ min, single fare, claimed in your TfL account — there's no timetable to auto-check like trains).</p>
+    <div class="col-span-2 grid grid-cols-3 gap-1 text-sm">
+      ${TUBE_LINES.map(([id, name]) => `<label class="flex items-center gap-1"><input name="tflLine" type="checkbox" value="${id}" ${(c.tflLines || []).includes(id) ? "checked" : ""} /> ${name}</label>`).join("")}
+    </div>
 
     <label class="flex flex-col col-span-2">Backfill past days (7–28)<input name="scanDays" type="number" min="7" max="28" value="${c.scanDays}" class="border rounded px-2 py-1 w-32" /></label>
     <button class="col-span-2 bg-accent text-white px-4 py-2 rounded-md w-fit">Save settings</button>
@@ -400,10 +461,18 @@ document.addEventListener("click", async (e) => {
   }
   if (t.dataset.confirm) render(await api("/api/ticket/confirm", { id: t.dataset.confirm }));
   if (t.dataset.del && confirm("Stop tracking this journey and remove it?")) render(await api("/api/ticket/delete", { id: t.dataset.del }));
+  if (t.closest("#bulk-del")) {
+    const ids = [...document.querySelectorAll("[data-sel]:checked")].map((b) => b.dataset.sel);
+    if (ids.length && confirm(`Stop tracking and remove ${ids.length} ${ids.length === 1 ? "journey" : "journeys"}?`)) render(await api("/api/tickets/delete", { ids }));
+  }
 });
 
 document.addEventListener("change", async (e) => {
   const el = e.target;
+  // Row selection: "select all" toggles every row; either way, refresh the bulk bar. Local-only —
+  // no server call, nothing persists until the user actually hits Remove selected.
+  if (el.id === "sel-all") { document.querySelectorAll("[data-sel]").forEach((b) => (b.checked = el.checked)); return updateBulk(); }
+  if (el.matches("[data-sel]")) return updateBulk();
   // Global default — re-types and re-prices every route ticket (pending and arrived); emailed tickets keep their receipt type.
   if (el.id === "default-type") return render(await api("/api/config", { defaultTicketType: el.value }));
   // Per-ticket overrides for a route-monitored ticket: operator (fixes the wrong-train guess) and type.
@@ -422,7 +491,7 @@ document.addEventListener("submit", async (e) => {
   if (e.target.id !== "config-form") return;
   e.preventDefault();
   const f = new FormData(e.target);
-  const cfg = { scanDays: Number(f.get("scanDays")), demo: !!f.get("demoMode") };
+  const cfg = { scanDays: Number(f.get("scanDays")), demo: !!f.get("demoMode"), tflLines: f.getAll("tflLine") };
   if (f.get("rttToken")) cfg.rtt = { token: f.get("rttToken"), ...(f.get("rttUser") ? { user: f.get("rttUser") } : {}) };
   render(await api("/api/config", cfg));
 });

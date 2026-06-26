@@ -12,9 +12,13 @@ import { demoProvider, demoRoute } from "../demo.js";
 import { FakeArrivalProvider } from "../arrival/provider.js";
 import { createServer } from "../server.js";
 import { sweep, backfill, type Ctx } from "../app.js";
+import { TflApi, runTflPoll } from "../tfl/status.js";
+import { notify } from "../notify.js";
 
 const PORT = Number(process.env.DRS_PORT ?? 4505);
 const STATE_PATH = process.env.DRS_STATE ?? join(homedir(), ".delay-repay-sweeper", "state.json");
+// Local TfL disruption history (plain JSONL — it's not secret, just a log of public line status).
+const TFL_LOG = join(dirname(STATE_PATH), "tfl-log.jsonl");
 // Master key precedence: explicit env > OS keychain > dev default (so the demo runs with no setup).
 // ponytail: dev default for the demo; real installs set it once and it lives in the keychain.
 const PASSPHRASE = process.env.DRS_PASSPHRASE ?? getPassphrase() ?? "dev-passphrase";
@@ -45,11 +49,26 @@ const provider = buildProvider(state.config);
 
 const ctx: Ctx = {
   statePath: STATE_PATH, passphrase: PASSPHRASE, state, provider,
-  executor: new ManualHelperExecutor(), demo, buildProvider,
+  executor: new ManualHelperExecutor(), demo, buildProvider, tflLogPath: TFL_LOG,
 };
 
 // Live sweep every 5 minutes: poll due arrivals, fire notifications and deadline alerts.
 setInterval(() => void sweep(ctx).catch((e) => console.error("sweep failed:", e.message)), 5 * 60 * 1000);
+
+// TfL Tube/DLR line-status nudges: poll every 10 min and, once a day per line, nudge if a watched
+// line is badly disrupted for a reason within TfL's control. Separate from the rail sweep because
+// the Tube has no timetable to compare against — this is a "go check your TfL account" signal only.
+{
+  const tfl = new TflApi(state.config.tflAppKey);
+  const runTfl = () => {
+    if (!state.config.tflLines?.length) return; // re-checked each tick so adding lines takes effect live
+    state.tflNotified ??= {};
+    void runTflPoll(tfl, state.config.tflLines, state.tflNotified, (msg) => notify("Delay Repay", msg), TFL_LOG)
+      .catch((e) => console.error("tfl watch failed:", e.message));
+  };
+  runTfl();
+  setInterval(runTfl, 10 * 60 * 1000);
+}
 
 // HSP batch fallback at 02:00 daily for anything still unresolved.
 if (state.config.hsp) {

@@ -28,9 +28,10 @@ export class DemoArrivalProvider implements ArrivalProvider {
     };
     // originCrs = Waterloo, so they survive the origin filter for the demo Waterloo→Brighton route.
     return [
-      { scheduledArrival: at("08:30"), actualArrival: late(at("08:30"), 22), originCrs: "WAT" }, // delayed
-      { scheduledArrival: at("08:50"), actualArrival: late(at("08:50"), 18), originCrs: "WAT" }, // delayed (2nd candidate)
-      { scheduledArrival: at("09:00"), actualArrival: late(at("09:00"), 3), originCrs: "WAT" }, // on time -> ignored
+      // toc = SN (Southern) so the demo shows a real operator name, not a dash — live RTT data carries it.
+      { scheduledArrival: at("08:30"), actualArrival: late(at("08:30"), 22), originCrs: "WAT", toc: "SN" }, // delayed
+      { scheduledArrival: at("08:50"), actualArrival: late(at("08:50"), 18), originCrs: "WAT", toc: "SN" }, // delayed (2nd candidate)
+      { scheduledArrival: at("09:00"), actualArrival: late(at("09:00"), 3), originCrs: "WAT", toc: "SN" }, // on time -> ignored
     ];
   }
 }

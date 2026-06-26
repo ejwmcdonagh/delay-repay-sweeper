@@ -14,6 +14,9 @@ interface NgArrival {
 }
 interface NgService {
   temporalData?: { arrival?: NgArrival };
+  // Operating TOC. RTT carries it as atocCode at the service top level; scheduleMetadata.operator
+  // is kept as a fallback for the assumed NG shape. Without it the operator column shows a dash.
+  atocCode?: string;
   scheduleMetadata?: { operator?: { code?: string } };
   // Originating station, so a watched route can drop arrivals from other origins. ponytail: field
   // name assumed for the NG schema like the rest of this client — verify against live data.
@@ -45,7 +48,7 @@ export function parseNgServices(json: NgResponse): RouteService[] {
     out.push({
       scheduledArrival: parseNaive(a.scheduleAdvertised),
       actualArrival: a.isCancelled || !a.realtimeForecast ? null : parseNaive(a.realtimeForecast),
-      toc: s.scheduleMetadata?.operator?.code,
+      toc: s.atocCode ?? s.scheduleMetadata?.operator?.code,
       originCrs: s.locationDetail?.origin?.[0]?.crs,
       cancelled: !!a.isCancelled,
     });

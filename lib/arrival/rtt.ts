@@ -18,6 +18,9 @@ export function buildSearchUrl(crs: string, scheduled: Date): string {
 }
 
 interface RttService {
+  // atocCode is the operating TOC, carried at the service top level (e.g. "GW"). Without it every
+  // watched-route ticket shows a blank operator.
+  atocCode?: string;
   locationDetail?: { gbttBookedArrival?: string; realtimeArrival?: string; origin?: { crs?: string }[] };
 }
 interface RttResponse {
@@ -55,7 +58,7 @@ export function parseServices(json: RttResponse, date: Date, fromTime: string, t
     const booked = s.locationDetail?.gbttBookedArrival;
     if (!booked || booked < fromTime.replace(":", "") || booked > toTime.replace(":", "")) continue;
     const scheduledArrival = timeFrom(date, `${booked.slice(0, 2)}:${booked.slice(2, 4)}`);
-    out.push({ scheduledArrival, actualArrival: parseArrival(json, scheduledArrival) });
+    out.push({ scheduledArrival, actualArrival: parseArrival(json, scheduledArrival), toc: s.atocCode });
   }
   return out;
 }

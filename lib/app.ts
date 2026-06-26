@@ -11,6 +11,7 @@ import type { TicketExtras } from "./types.js";
 import { validateTicket } from "./validate.js";
 import { assessDelay, type TicketType } from "./eligibility.js";
 import { schemeForToc } from "./toc/schemes.js";
+import { tocName } from "./toc/names.js";
 import { toCrs } from "./stations.js";
 import type { HspBackfiller } from "./arrival/hsp.js";
 import { firstPollAt, isDue } from "./schedule/poll.js";
@@ -28,6 +29,8 @@ export interface Ctx {
   demo: boolean;
   /** Rebuilds the arrival provider from config, so saving an RTT token takes effect immediately. */
   buildProvider?: (config: Config) => ArrivalProvider;
+  /** Path to the local TfL disruption history log (the dashboard reads it for past disruptions). */
+  tflLogPath?: string;
 }
 
 /**
@@ -378,6 +381,13 @@ export function removeTicket(ctx: Ctx, id: string): void {
   persist(ctx);
 }
 
+/** Bulk-remove the selected tickets in one save, so clearing a screenful isn't one click per row. */
+export function removeTickets(ctx: Ctx, ids: string[]): void {
+  const drop = new Set(ids);
+  ctx.state.tickets = ctx.state.tickets.filter((t) => !drop.has(t.id));
+  persist(ctx);
+}
+
 /** Merge user-supplied claim data (ticket number, smartcard ref, medium) into a ticket. */
 export function setExtras(ctx: Ctx, id: string, extras: TicketExtras): void {
   const t = ctx.state.tickets.find((x) => x.id === id);
@@ -399,7 +409,7 @@ export function view(ctx: Ctx) {
     // Dedup in the read path too, so duplicates minted before this existed never show, even if no
     // sweep has run since. portalUrl is set only for operators with a verified Delay Repay portal
     // (toc/portals.json); the dashboard hides "Claim now" when it's absent.
-    tickets: dedupeRouteTickets(ctx.state.tickets).map((t) => ({ ...t, portalUrl: portalFor(t.toc) })),
+    tickets: dedupeRouteTickets(ctx.state.tickets).map((t) => ({ ...t, portalUrl: portalFor(t.toc), operator: tocName(t.toc) })),
     metrics: computeMetrics(ctx.state.tickets),
   };
 }

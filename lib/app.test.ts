@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dedupeRouteTickets, setExtras, setTicketDetails, removeTicket, claim, markFiled, sweep, view, confirmJourney, applyConfig, backfillRoutes, addRoute, setRouteFares, type Ctx } from "./app.js";
+import { dedupeRouteTickets, setExtras, setTicketDetails, removeTicket, removeTickets, claim, markFiled, sweep, view, confirmJourney, applyConfig, backfillRoutes, addRoute, setRouteFares, type Ctx } from "./app.js";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { randomBytes } from "node:crypto";
@@ -80,6 +80,15 @@ describe("removeTicket", () => {
     const ctx = ctxFor();
     ctx.state.tickets = [ticket("A"), ticket("B")];
     removeTicket(ctx, "A");
+    expect(ctx.state.tickets.map((t) => t.id)).toEqual(["B"]);
+  });
+});
+
+describe("removeTickets", () => {
+  it("drops every selected ticket in one go, keeping the rest", () => {
+    const ctx = ctxFor();
+    ctx.state.tickets = [ticket("A"), ticket("B"), ticket("C")];
+    removeTickets(ctx, ["A", "C"]);
     expect(ctx.state.tickets.map((t) => t.id)).toEqual(["B"]);
   });
 });

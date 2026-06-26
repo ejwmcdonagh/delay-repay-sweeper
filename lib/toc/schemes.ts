@@ -11,10 +11,12 @@ const DR30: Scheme = {
   fullReturnMinutes: 120,
 };
 
-// TfL (Elizabeth line / Overground via XR): refunds the single fare once delayed 30+ minutes — no
-// percentage banding and no return escalation (pay-as-you-go). Modelled as a single 100% tier at 30.
+// TfL service delay refund (Tube / DLR / pay-as-you-go Overground & Elizabeth line): refunds the
+// single pay-as-you-go fare once a journey runs 15+ minutes late — no percentage banding and no
+// return escalation. Claim within 28 days. Modelled as a single 100% tier at 15 minutes.
+// (https://tfl.gov.uk/fares/refunds-and-replacements/tube-and-dlr-delays)
 const TFL: Scheme = {
-  tiers: [{ minMinutes: 30, legFraction: 1 }],
+  tiers: [{ minMinutes: 15, legFraction: 1 }],
   fullReturnMinutes: null,
 };
 
@@ -23,7 +25,8 @@ const BY_TOC: Record<string, Scheme> = {
   GR: DR30, // LNER
   XC: DR30, // CrossCountry
   SR: DR30, // ScotRail
-  XR: TFL, // TfL / Elizabeth line
+  TFL: TFL, // TfL service delay refund
+  XR: TFL, // "XR" is the Elizabeth line's National Rail operator code in live arrival data — same TfL scheme
 };
 
 /** The Delay Repay scheme for an operating TOC code, defaulting to national Delay Repay 15. */
